@@ -1,6 +1,55 @@
-/* OWNER: ARUNABHA
- * PURPOSE: IT CONTAINS THE HEADER FILES AND DATA STRUCTURE NEEDED FOR
+/* 
+ * OWNER: ARUNABHA CHAKRABORTY
+ * 	  AMAN SACHAN
+ * PURPOSE: IT CONTAINS THE FUNCTION PROTOTYPES AND DATA STRUCTURE NEEDED FOR
  *          p2psh.c
  */
-int peer_connect(char *ip_address, char *port_number);
+#include <pthread.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <openssl/sha.h>
 
+/*
+ * peer structure definations.
+ */
+struct peer_socket_info
+{
+	int client_soc_fd;
+	struct in_addr;
+	pthread_t tid;
+	struct peer_socket_info* next;
+}
+
+/*
+ * Metadata structure
+ */
+struct meta_info
+{
+	char hash[SHA_DIGEST_LENGTH+1];
+	int file_len;
+	char filename[50];
+	char file_type[5];
+	struct meta_info* next;
+}
+
+/*
+ * peer list head
+ */
+struct peer_socket_info* head = NULL;
+
+/*
+ * metadata list head
+ */
+struct meta_info* meta_head = NULL;
+
+/*
+ * function declerations
+ */
+int peer_connect(char *ip_address, char *port_number);
+int server();
+int metadata();
+int show_peers();
+int show_metadata();

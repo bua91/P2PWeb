@@ -1,8 +1,15 @@
+/*
+ * FILE NAME: p2psh.c
+ * OWNER: ARUNABHA CHAKRABORTY
+ * 	  AMAN SACHAN
+ */
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <pthread.h>
+#include <conio.h>
 #include "p2psh.h"
 
 #define TOK_BUFF_SIZE 128
@@ -15,10 +22,11 @@ int p2psh_cd(char **args);
 int p2psh_help(char **args);
 int p2psh_exit(char **args);
 
+#if 0
 /*
  * List of built in cmd strings and there corresponding function callbacks.
  */
-/*char *built_in_cmd_str[] = {
+char *built_in_cmd_str[] = {
 	"cd",
 	"help",
 	"exit"
@@ -29,14 +37,15 @@ int (*built_in_cmd_fun_callbacks[]) (char **) = {
     	&p2psh_help,
       	&p2psh_exit
 };
-*/
+
 /*
  * Number of buil in cmds
  */
-/*int p2psh_num_built_in(){
+int p2psh_num_built_in(){
 	return sizeof(built_in_cmd_str) / sizeof(char *);
 }
-*/
+#endif
+
 /*
  * Built in function implementations.
  * ************************************************************
@@ -169,11 +178,13 @@ int cmd_execute (char **args)
 	int i;
 	if (args[0] == NULL)
 		return 1;
-	//for(i = 0; i < p2psh_num_built_in; i++){
-	//if (strcmp(args[0],built_in_cmd_str[i]) == 0){
-	//	return (*built_in_cmd_fun_callbacks[i])(args);
-	//	}
-	//}
+#if 0
+	for(i = 0; i < p2psh_num_built_in; i++){
+	if (strcmp(args[0],built_in_cmd_str[i]) == 0){
+		return (*built_in_cmd_fun_callbacks[i])(args);
+		}
+	}
+#endif
 	if (strcmp (args[0],"help") == 0){
 		return (p2psh_help(args));
 	}
@@ -194,7 +205,36 @@ int cmd_execute (char **args)
 		}
 		return (peer_connect(args[1], args[2]))
 	}
+	else if (strcmp (args[0], "publish") == 0){
+		if ( args[1] == '\0'){
+			fprintf(stderr, "p2psh: filename not provided!!\n");
+			return 1;
+		}
+		if (publish_data(args[1]) == 0){
+			fprintf(stderr, "p2psh: publish failed!!\n");
+			return 1;
+		}
+		return 1;
+	}
+	else if (strcmp (args[0], "show") == 0){
+		if (strcmp (args[1], "peer")){
+			return (show_peers());
+		}
+		else if (strcmp (args[1], "metadata")){
+			return (show_metadata());
+		}
+	}
 	return (cmd_launch(args));
+}
+
+/*
+ * function for starting local server
+ */
+void *local_server(void * arg)
+{
+	int ret;
+	ret = server();
+	return ret;
 }
 
 /*
@@ -205,12 +245,20 @@ int main(int argc, char **argv)
         char *cmd_str;
         char **cmd_args;
         int status;
+	pthread_t tid;
+	clrscr();
 	printf("=======================================================\n\n");
 	printf("                        P2PSH                          \n\n");
-	printf("                (CREATOR: ARUNABHA)                    \n\n");
+	printf("       (CREATORS: ARUNABHA CHAKRABORTY                 \n\n");
+	PRINTF("                  AMAN SACHAN                          \n\n");
 	printf("=======================================================\n\n");
+	/* Run local server in a new thread upon starting p2psh*/
+	pthread_create(&tid, NULL, local_server, NULL);
+	/* Create metadata table for the local files*/
+	metadata();
+	/* Start the shell and execute comands*/
         do{
-                printf("p2psh>>");
+                printf("P2PSH>>");
                 cmd_str = read_line();
                 cmd_args = parse_line(cmd_str);
                 status = cmd_execute(cmd_args);
