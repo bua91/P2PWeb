@@ -34,7 +34,7 @@ void *peer_handler (void *arg){
 	//send part
 	
 	while (1){
-		delay(1);
+		
 	}
 }
 

@@ -9,7 +9,6 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <pthread.h>
-#include <conio.h>
 #include "p2psh.h"
 
 #define TOK_BUFF_SIZE 128
@@ -58,7 +57,12 @@ int p2psh_help(char **args)
 	printf("P2PSH SUPPORTED BUILT IN COMANDS\n");
 	printf("help                                   Displayes the helpline\n");
 	printf("cd                                     Changes directory\n");
-	printf("PEER <IP_ADDRESS> <PORT>               To peer with a neighbor. Please use port 9000 for peering\n");
+	printf("peer <IP_ADDRESS> <PORT>               To peer with a neighbor. Please use port 9000 for peering\n");
+	printf("publish <filename>                     To publish the file\n");
+	printf("unpublish <hash>                       To unpublish the file corresponding to the hash\n");
+	printf("show peers                             To show the peer table\n");
+	printf("show metadata                          To show the metadata and endpoint information\n");
+	printf("show published                         To show the metadata information currently being published\n");
 	printf("exit                                   Exit p2psh\n");
 	return 1;
 }
@@ -168,6 +172,26 @@ int cmd_launch(char **args)
   	return 1;
 }
 
+#if 0
+int peerconnect(char *ip_address, char *port_number)
+{
+	//pthread_t tid;
+	//pthread_create(&tid, NULL, peer_connect, (void *)ip_address);
+	pid_t pid;
+	pid = fork();
+	if (pid < 0){
+		fprintf(stderr, "p2psh: fork failed for client!!\n");
+		return 1;
+	}
+	else if (pid == 0){
+		peer_connect(ip_address, port_number);
+	}
+	else {
+		return 1;
+	}
+}
+#endif
+
 /*
  * NAME: cmd_execute
  * RETURN_TYPE: integer
@@ -203,7 +227,7 @@ int cmd_execute (char **args)
 			fprintf(stderr, "p2psh: Peer port should be 9000!!\n");
 			return 1;
 		}
-		return (peer_connect(args[1], args[2]))
+		return (peer_connect(args[1], args[2]));
 	}
 	else if (strcmp (args[0], "publish") == 0){
 		if ( args[1] == '\0'){
@@ -216,12 +240,18 @@ int cmd_execute (char **args)
 		}
 		return 1;
 	}
+	else if (strcmp (args[0], "unpublish") == 0){
+		return unpublish_data(args[1]);
+	}
 	else if (strcmp (args[0], "show") == 0){
 		if (strcmp (args[1], "peer")){
 			return (show_peers());
 		}
 		else if (strcmp (args[1], "metadata")){
 			return (show_metadata());
+		}
+		else if (strcmp (args[1], "published")){
+			return (show_published());
 		}
 	}
 	return (cmd_launch(args));
@@ -246,11 +276,10 @@ int main(int argc, char **argv)
         char **cmd_args;
         int status;
 	pthread_t tid;
-	clrscr();
 	printf("=======================================================\n\n");
 	printf("                        P2PSH                          \n\n");
 	printf("       (CREATORS: ARUNABHA CHAKRABORTY                 \n\n");
-	PRINTF("                  AMAN SACHAN                          \n\n");
+	printf("                  AMAN SACHAN                          \n\n");
 	printf("=======================================================\n\n");
 	/* Run local server in a new thread upon starting p2psh*/
 	pthread_create(&tid, NULL, local_server, NULL);

@@ -16,7 +16,7 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <pthread.h>
-#include<openssl/sha.h>
+#include <openssl/sha.h>
 #include <dirent.h>
 #include "p2psh.h"
 
@@ -98,7 +98,7 @@ int metadata()
 		        continue;
 		fptr = fopen(in_file->d_name, "r");
 		if (fptr == NULL){
-			fprintf("p2psh: failed to open demo file!!\n");
+			fprintf(stderr, "p2psh: failed to open demo file!!\n");
 			return 1;
 		}
 

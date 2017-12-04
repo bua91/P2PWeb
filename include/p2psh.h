@@ -18,10 +18,10 @@
 struct peer_socket_info
 {
 	int client_soc_fd;
-	struct in_addr;
+	struct in_addr in_addr;
 	pthread_t tid;
 	struct peer_socket_info* next;
-}
+};
 
 /*
  * Metadata structure
@@ -29,21 +29,22 @@ struct peer_socket_info
 struct meta_info
 {
 	char hash[SHA_DIGEST_LENGTH+1];
+	struct in_addr in_addr;
 	int file_len;
 	char filename[50];
 	char file_type[5];
 	struct meta_info* next;
-}
+};
 
 /*
  * peer list head
  */
-struct peer_socket_info* head = NULL;
+struct peer_socket_info* head;
 
 /*
  * metadata list head
  */
-struct meta_info* meta_head = NULL;
+struct meta_info* meta_head;
 
 /*
  * function declerations
@@ -51,5 +52,8 @@ struct meta_info* meta_head = NULL;
 int peer_connect(char *ip_address, char *port_number);
 int server();
 int metadata();
+int publish_data(char *filename);
+int unpublish_data( char *hash);
 int show_peers();
+int show_published();
 int show_metadata();
